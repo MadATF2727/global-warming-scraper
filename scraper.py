@@ -1,15 +1,24 @@
 import requests
 from bs4 import BeautifulSoup
+from selenium import webdriver
 
 class BaseScraper(object):
     def __init__(self, url):
         self.soup = BeautifulSoup(requests.get(url).text, 'lxml')
+        self.url = url
+
 
     def scrape_page(self):
         pass
 
 class NcdcScraper(BaseScraper):
+    def __init__(self, url):
+        BaseScraper.__init__(self, url)
+        self.driver = webdriver.Safari()
+        self.driver.get(self.url)
+
     def scrape_page(self):
+
         import pdb;pdb.set_trace()
 
 class GallupScraper(BaseScraper):
@@ -104,13 +113,12 @@ class GallupScraper(BaseScraper):
         return table_dict
 
     def _get_values_for_row(self, row):
-        row_dict = {}
         cols = row.find_all("td")
-        self._fill_values(cols)
+        row_dict = self._fill_values(cols)
         return row_dict
 
 if __name__ == "__main__":
     gallup_scraper = GallupScraper(url="https://news.gallup.com/poll/1615/environment.aspx")
-    parsed_graphs, parsed_tabled = gallup_scraper.scrape_page()
-    ncdc_scraper = NcdcScraper(url="https://www.ncdc.noaa.gov/billions/")
+    parsed_graphs, parsed_tables = gallup_scraper.scrape_page()
+    ncdc_scraper = NcdcScraper(url="https://www.c2es.org/content/extreme-weather-and-climate-change/")
     ncdc_scraper.scrape_page()
